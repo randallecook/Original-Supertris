@@ -1,15 +1,74 @@
 // Javascript code for Original SUpertris
 // Copyright (C) 2011 Randall Cook. All Rights Reserved
 
+/*
+ * Data Structures
+ * 
+ * Board
+ * The board is a 2D array of integers, where zero means empty, negative 
+ * numbers are game-generated pieces, and positive numbers are user-generated 
+ * pieces. Until I learn how to use multidimensional arrays in JavaScript, 
+ * I'll use a simple 1D array and compute offsets manually.
+ * 
+ * Piece
+ * A piece contains several attributes: a list of relative offsets from 
+ * its current position where it extends (extents), a name for itself, 
+ * a reference to the piece it should rotate into. Each extent consists 
+ * of X and Y offsets, and a reference to the image to display on screen.
+ * 
+ * Active Piece
+ * There is a master list of pieces that should not change. The active 
+ * piece, which is the currently falling, consists of X and Y board 
+ * coordinates, an ID number to distinguish it from other pieces on the 
+ * board, and a reference to the reference piece that it is.
+ */
+
 window.onload = initAll;
 
+// constants
 var kBlockSize = 16;
 var kBoardWidth = 11;
 var kBoardHeight = 17;
+var kBoardArea = kBoardWidth * kBoardHeight;
 var kNextWidth = 4;
 var kNextHeight = 4;
+var kNextArea = kNextWidth * kNextHeight;
 var kLoopTime = 333; // milliseconds per game loop cycle
 
+// pieces
+var stick_h = createPiece([-2, -1, 0, 1], [0, 0, 0, 0]);
+var stick_v = createPiece([0, 0, 0, 0], [-2, -1, 0, 1]);
+var square = createPiece([-1, 0, -1, 0], [-1, -1, 0, 0]);
+var S_h = createPiece([1, 0, 0, -1], [-1, -1, 0, 0]);
+var S_v = createPiece([-1, -1, 0, 0], [-1, 0, 0, 1]);
+var Z_h = createPiece([-1, 0, 0, 1], [-1, -1, 0, 0]);
+var Z_v = createPiece([1, 1, 0, 0], [-1, 0, 0, 1]);
+var J_1 = createPiece([-1, 0, 0, 0], [0, 0, -1, -2]);
+var J_2 = createPiece([0, 0, -1, -2], [0, -1, -1, -1]);
+var J_3 = createPiece([0, -1, -1, -1], [-1, -1, 0, 1]);
+var J_4 = createPiece([-1, -1, 0, 1], [-1, 0, 0, 0]);
+var L_1 = createPiece([0, -1, -1, -1], [0, 0, -1, -2]);
+var L_2 = createPiece([0, 0, -1, -2], [-1, 0, 0, 0]);
+var L_3 = createPiece([0, -1, -1, -1], [-1, -1, 0, 1]);
+var L_4 = createPiece([-1, -1, 0, 1], [0, -1, -1, -1]);
+stick_h.next = stick_v;
+stick_v.next = stick_h;
+square.next = square;
+S_h.next = S_v;
+S_v.next = S_h;
+Z_h.next = Z_v;
+Z_v.next = Z_h;
+J_1.next = J_2;
+J_2.next = J_3;
+J_3.next = J_4;
+J_4.next = J_1;
+L_1.next = L_2;
+L_2.next = L_3;
+L_3.next = L_4;
+L_4.next = L_1;
+var gPieces = [stick_h, square, S_h, Z_h, J_1, L_1];
+
+// game variables
 var gBoardCanvas = null;
 var gBoardContext = null;
 var gNextCanvas = null;
@@ -177,4 +236,26 @@ function createCanvas(width, height)
 	canvas.appendChild(document.createTextNode("HTML canvas not supported. Try a newer browser"));
 	
 	return canvas;
+}
+
+function createPiece(x_extents, y_extents)
+{
+	if (x_extents.length != y_extents.length)
+	{
+		alert("different lengths");
+		return null;
+	}
+	
+	piece = new Object;
+	
+	piece.x = x_extents;
+	piece.y = y_extents;
+	
+	s = "extents:";
+	for (var i = 0; i < x_extents.length; i++)
+	{
+		s += " " + x_extents[i] + "," + y_extents[i];
+	}
+	alert(s);
+	return piece;
 }
