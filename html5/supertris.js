@@ -30,6 +30,8 @@ function initAll()
 	document.getElementById("rotate").onclick = rotate;
 	document.getElementById("drop").onclick = drop;
 	
+	document.onkeypress = handleKey;
+	
 	// create the main board canvas
 	gBoardCanvas = createCanvas(kBoardWidth * kBlockSize, kBoardHeight * kBlockSize);
 	document.getElementById("boardArea").appendChild(gBoardCanvas);
@@ -104,8 +106,27 @@ function gameLoop()
 	}
 }
 
-function handleKey()
+function handleKey(event)
 {
+	//alert("key pressed:" + event.charCode);
+	document.getElementById("debug").innerHTML = "charCode: " + event.charCode;
+	// j, k, l = 106, 107, 108
+	if (event.charCode == 106 || event.charCode == 74)
+	{
+		moveLeft();
+	}
+	else if (event.charCode == 107 || event.charCode == 75)
+	{
+		rotate();
+	}
+	else if (event.charCode == 108 || event.charCode == 76)
+	{
+		moveRight();
+	}
+	else if (event.charCode == 32)
+	{
+		drop();
+	}
 }
 
 function moveLeft()
