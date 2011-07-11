@@ -259,11 +259,14 @@ function createPiece(x_extents, y_extents)
 	piece.x = x_extents;
 	piece.y = y_extents;
 	
+	/*
 	s = "extents:";
 	for (var i = 0; i < x_extents.length; i++)
 	{
 		s += " " + x_extents[i] + "," + y_extents[i];
 	}
 	alert(s);
+	*/
+	
 	return piece;
 }
