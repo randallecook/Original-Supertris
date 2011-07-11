@@ -270,3 +270,12 @@ function createPiece(x_extents, y_extents)
 	
 	return piece;
 }
+
+function randomInt(range)
+{
+	// It might be worthwhile to check for Math.random returning 1.0, 
+	// which would violate the [0, range) expected behavior, and to 
+	// enforce limits on the input range as well.
+	
+	return Math.floor(range * Math.random());
+}
