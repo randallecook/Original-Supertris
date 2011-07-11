@@ -18,7 +18,7 @@
  * 
  * Active Piece
  * There is a master list of pieces that should not change. The active 
- * piece, which is the currently falling, consists of X and Y board 
+ * piece, which is the one currently falling, consists of X and Y board 
  * coordinates, an ID number to distinguish it from other pieces on the 
  * board, and a reference to the reference piece that it is.
  */
@@ -51,6 +51,10 @@ var L_1 = createPiece([0, -1, -1, -1], [0, 0, -1, -2]);
 var L_2 = createPiece([0, 0, -1, -2], [-1, 0, 0, 0]);
 var L_3 = createPiece([0, -1, -1, -1], [-1, -1, 0, 1]);
 var L_4 = createPiece([-1, -1, 0, 1], [0, -1, -1, -1]);
+var T_1 = createPiece([-1, 0, 1, 0], [0, 0, 0, 1]);
+var T_2 = createPiece([0, 0, 0, 1], [-1, 0, 1, 0]);
+var T_3 = createPiece([-1, 0, 1, 0], [0, 0, 0, -1]);
+var T_4 = createPiece([0, 0, 0, -1], [-1, 0, 1, 0]);
 stick_h.next = stick_v;
 stick_v.next = stick_h;
 square.next = square;
@@ -66,7 +70,11 @@ L_1.next = L_2;
 L_2.next = L_3;
 L_3.next = L_4;
 L_4.next = L_1;
-var gPieces = [stick_h, square, S_h, Z_h, J_1, L_1];
+T_1.next = T_2;
+T_2.next = T_3;
+T_3.next = T_4;
+T_4.next = T_1;
+var gPieces = [stick_h, square, S_h, Z_h, J_1, L_1, T_1];
 
 // game variables
 var gBoardCanvas = null;
