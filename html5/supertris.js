@@ -87,6 +87,7 @@ var gTimer = null;
 var gLoopCount = 0;
 var gTotalLoopTimeouts = 0;
 var gPlaying = 0;
+var gActivePiece = null;
 
 function initAll()
 {
@@ -114,10 +115,11 @@ function startGame()
 {
 	// reset game variables
 	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
-	gY = 0;
+	gY = 2;
 	gLoopCount = 1;
 	gTotalLoopTimeouts = kLoopTime;
 	gPlaying = 1;
+	gActivePiece = gPieces[randomInt(gPieces.length)];
 	
 	// update the screen
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
@@ -142,19 +144,15 @@ function gameLoop()
 	var loopStart = new Date();
 	
 	// move the piece down
-	var oldY = gY;
-	gY += 1;
-	
-	if (gY == kBoardHeight)
+	var moveSuccess = moveActivePiece(0, 1, false);
+
+	// handle the case when we cannot move the piece down
+	if (moveSuccess == false)
 	{
 		alert("Game Over! (" + gLoopCount + " loops, " + (gTotalLoopTimeouts / gLoopCount).toFixed(1) + " ms per loop)");
 		gPlaying = 0;
 		return;
 	}
-	
-	// update the screen
-	gBoardContext.clearRect(gX * kBlockSize, oldY * kBlockSize, kBlockSize, kBlockSize);
-	gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
 	
 	// prepare for another loop
 	var loopEnd = new Date();
@@ -200,12 +198,7 @@ function moveLeft()
 {
 	if (gPlaying)
 	{
-		if (gX > 0)
-		{
-			gBoardContext.clearRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
-			gX -= 1;
-			gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
-		}
+		moveActivePiece(-1, 0, false);
 	}
 	
 	return false;
@@ -215,12 +208,7 @@ function moveRight()
 {
 	if (gPlaying)
 	{
-		if (gX < (kBoardWidth - 1))
-		{
-			gBoardContext.clearRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
-			gX += 1;
-			gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
-		}
+		moveActivePiece(1, 0, false);
 	}
 	
 	return false;
@@ -228,6 +216,11 @@ function moveRight()
 
 function rotate()
 {
+	if (gPlaying)
+	{
+		moveActivePiece(0, 0, true);
+	}
+	
 	return false;
 }
 
@@ -269,6 +262,68 @@ function createPiece(x_extents, y_extents)
 	*/
 	
 	return piece;
+}
+
+function moveActivePiece(deltaX, deltaY, rotate)
+{
+	var i, x, y;
+	
+	// verify that we can move the piece
+	for (i = 0; i < gActivePiece.x_extents.length; i++)
+	{
+		x = gX + deltaX + gActivePiece.x_extents[i];
+		y = gY + deltaY + gActivePiece.y_extents[i];
+		
+		if (getBoardID(x, y) != 0)
+		{
+			return false;
+		}
+	}
+	
+	// erase the current piece
+	for (i = 0; i < gActivePiece.x_extents.length; i++)
+	{
+		x = gX + gActivePiece.x_extents[i];
+		y = gY + gActivePiece.y_extents[i];
+		
+		gBoardContext.clearRect(x * kBlockSize, y * kBlockSize, kBlockSize, kBlockSize);
+	}
+	
+	// apply the transformation
+	gX += deltaX;
+	gY += deltaY;
+	
+	if (rotate)
+	{
+		gActivePiece = gActivePiece.next;
+	}
+	
+	// draw the piece in the new location
+	for (i = 0; i < gActivePiece.x_extents.length; i++)
+	{
+		x = gX + gActivePiece.x_extents[i];
+		y = gY + gActivePiece.y_extents[i];
+		
+		gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
+	}
+	
+	// indicate that we could move the piece
+	return true;
+}
+
+function getBoardID(x, y)
+{
+	if (x < 0 || x >= kBoardWidth)
+	{
+		return -1;
+	}
+	
+	if (y < 0 || y >= kBoardHeight)
+	{
+		return -1;
+	}
+	
+	return 0;
 }
 
 function randomInt(range)
