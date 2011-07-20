@@ -49,7 +49,7 @@ var J_3 = createPiece([0, -1, -1, -1], [-1, -1, 0, 1]);
 var J_4 = createPiece([-1, -1, 0, 1], [-1, 0, 0, 0]);
 var L_1 = createPiece([0, -1, -1, -1], [0, 0, -1, -2]);
 var L_2 = createPiece([0, 0, -1, -2], [-1, 0, 0, 0]);
-var L_3 = createPiece([0, -1, -1, -1], [-1, -1, 0, 1]);
+var L_3 = createPiece([-1, 0, 0, 0], [-1, -1, 0, 1]);
 var L_4 = createPiece([-1, -1, 0, 1], [0, -1, -1, -1]);
 var T_1 = createPiece([-1, 0, 1, 0], [0, 0, 0, 1]);
 var T_2 = createPiece([0, 0, 0, 1], [-1, 0, 1, 0]);
@@ -123,7 +123,6 @@ function startGame()
 	
 	// update the screen
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
-	gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
 	
 	// grab keyboard focus
 	
@@ -249,8 +248,8 @@ function createPiece(x_extents, y_extents)
 	
 	piece = new Object;
 	
-	piece.x = x_extents;
-	piece.y = y_extents;
+	piece.x_extents = x_extents;
+	piece.y_extents = y_extents;
 	
 	/*
 	s = "extents:";
@@ -304,10 +303,10 @@ function moveActivePiece(deltaX, deltaY, rotate)
 		x = gX + gActivePiece.x_extents[i];
 		y = gY + gActivePiece.y_extents[i];
 		
-		gBoardContext.fillRect(gX * kBlockSize, gY * kBlockSize, kBlockSize, kBlockSize);
+		gBoardContext.fillRect(x * kBlockSize, y * kBlockSize, kBlockSize, kBlockSize);
 	}
 	
-	// indicate that we could move the piece
+	// indicate that we moved the piece
 	return true;
 }
 
