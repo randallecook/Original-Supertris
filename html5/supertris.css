@@ -1,3 +1,18 @@
 /* HTML styles for Original Supertris
  * Copyright (C) 2011 Randall Cook. All Rights Reserved.
  */
+
+body
+{
+	font-family: sans;
+}
+
+h1
+{
+	font-size: 14pt;
+}
+
+p
+{
+	font-size: 10pt;
+}
