@@ -86,7 +86,7 @@ var gY = 0;
 var gTimer = null;
 var gLoopCount = 0;
 var gTotalLoopTimeouts = 0;
-var gPlaying = 0;
+var gPlaying = false;
 var gActivePiece = null;
 
 function initAll()
@@ -113,12 +113,17 @@ function initAll()
 
 function startGame()
 {
+	if (gPlaying == true)
+	{
+		return false;
+	}
+	
 	// reset game variables
 	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
 	gY = 2;
 	gLoopCount = 1;
 	gTotalLoopTimeouts = kLoopTime;
-	gPlaying = 1;
+	gPlaying = true;
 	gActivePiece = gPieces[randomInt(gPieces.length)];
 	
 	// update the screen
@@ -149,7 +154,7 @@ function gameLoop()
 	if (moveSuccess == false)
 	{
 		alert("Game Over! (" + gLoopCount + " loops, " + (gTotalLoopTimeouts / gLoopCount).toFixed(1) + " ms per loop)");
-		gPlaying = 0;
+		gPlaying = false;
 		return;
 	}
 	
@@ -190,6 +195,10 @@ function handleKey(event)
 	else if (event.charCode == 32)
 	{
 		drop();
+	}
+	else if (event.charCode == 112 || event.charCode == 80)
+	{
+		startGame();
 	}
 }
 
