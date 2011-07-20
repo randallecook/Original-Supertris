@@ -119,15 +119,16 @@ function startGame()
 	}
 	
 	// reset game variables
-	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
-	gY = 2;
 	gLoopCount = 1;
 	gTotalLoopTimeouts = kLoopTime;
 	gPlaying = true;
 	gActivePiece = gPieces[randomInt(gPieces.length)];
+	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
+	gY = 0 - minValue(gActivePiece.y_extents);
 	
 	// update the screen
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
+	plotActivePiece();
 	
 	// grab keyboard focus
 	
@@ -307,16 +308,21 @@ function moveActivePiece(deltaX, deltaY, rotate)
 	}
 	
 	// draw the piece in the new location
-	for (i = 0; i < gActivePiece.x_extents.length; i++)
-	{
-		x = gX + gActivePiece.x_extents[i];
-		y = gY + gActivePiece.y_extents[i];
-		
-		gBoardContext.fillRect(x * kBlockSize, y * kBlockSize, kBlockSize, kBlockSize);
-	}
+	plotActivePiece()
 	
 	// indicate that we moved the piece
 	return true;
+}
+
+function plotActivePiece()
+{
+	for (var i = 0; i < gActivePiece.x_extents.length; i++)
+	{
+		var x = gX + gActivePiece.x_extents[i];
+		var y = gY + gActivePiece.y_extents[i];
+		
+		gBoardContext.fillRect(x * kBlockSize, y * kBlockSize, kBlockSize, kBlockSize);
+	}
 }
 
 function getBoardID(x, y)
@@ -341,4 +347,19 @@ function randomInt(range)
 	// enforce limits on the input range as well.
 	
 	return Math.floor(range * Math.random());
+}
+
+function minValue(a)
+{
+	var minimum = a[0];
+	
+	for (var i = 1; i < a.length; i++)
+	{
+		if (a[i] < minimum)
+		{
+			minimum = a[i];
+		}
+	}
+	
+	return minimum;
 }
