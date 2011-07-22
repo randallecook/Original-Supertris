@@ -124,7 +124,7 @@ function startGame()
 	gPlaying = true;
 	gActivePiece = gPieces[randomInt(gPieces.length)];
 	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
-	gY = 0 - minValue(gActivePiece.y_extents);
+	gY = 0 - gActivePiece.minY;
 	
 	// update the screen
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
@@ -260,6 +260,11 @@ function createPiece(x_extents, y_extents)
 	
 	piece.x_extents = x_extents;
 	piece.y_extents = y_extents;
+
+	piece.minX = minValue(x_extents);
+	piece.maxX = maxValue(x_extents);
+	piece.minY = minValue(y_extents);
+	piece.maxY = maxValue(y_extents);
 	
 	/*
 	s = "extents:";
@@ -362,4 +367,19 @@ function minValue(a)
 	}
 	
 	return minimum;
+}
+
+function maxValue(a)
+{
+	var maximum = a[0];
+	
+	for (var i = 1; i < a.length; i++)
+	{
+		if (a[i] > maximum)
+		{
+			maximum = a[i];
+		}
+	}
+	
+	return maximum;
 }
