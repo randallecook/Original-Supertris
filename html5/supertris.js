@@ -88,6 +88,7 @@ var gLoopCount = 0;
 var gTotalLoopTimeouts = 0;
 var gPlaying = false;
 var gActivePiece = null;
+var gBoard = new Array();  // kBoardWidth * kBoardHeight
 
 function initAll()
 {
@@ -125,6 +126,7 @@ function startGame()
 	gActivePiece = gPieces[randomInt(gPieces.length)];
 	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
 	gY = 0 - gActivePiece.minY;
+	clearBoard();
 	
 	// update the screen
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
@@ -330,6 +332,17 @@ function plotActivePiece()
 	}
 }
 
+function clearBoard()
+{
+	for (var x = 0; x < kBoardWidth; x++)
+	{
+		for (var y = 0; y < kBoardHeight; y++)
+		{
+			gBoard[x + y * kBoardWidth] = 0;
+		}
+	}
+}
+
 function getBoardID(x, y)
 {
 	if (x < 0 || x >= kBoardWidth)
@@ -342,7 +355,31 @@ function getBoardID(x, y)
 		return -1;
 	}
 	
-	return 0;
+	return gBoard[x + y * kBoardWidth];
+}
+
+function canPlacePiece(piece, x, y)
+{
+	for (var i = 0; i < piece.x_extents.length; i++)
+	{
+		if (getBoardID(x + piece.x_extents[i], y + piece.y_extents[i]) != 0)
+		{
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+function gluePiece(piece, x, y, id)
+{
+	for (var i = 0; i < piece.x_extents.length; i++)
+	{
+		var xx = x + piece.x_extents[i];
+		var yy = y + piece.y_extents[i];
+		
+		gBoard[xx + yy * kBoardWidth] = id;
+	}
 }
 
 function randomInt(range)
