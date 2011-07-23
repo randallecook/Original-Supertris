@@ -88,7 +88,9 @@ var gLoopCount = 0;
 var gTotalLoopTimeouts = 0;
 var gPlaying = false;
 var gActivePiece = null;
+var gNextPiece = null;
 var gBoard = new Array();  // kBoardWidth * kBoardHeight
+var gStartNewPiece = false;
 
 function initAll()
 {
@@ -123,19 +125,15 @@ function startGame()
 	gLoopCount = 1;
 	gTotalLoopTimeouts = kLoopTime;
 	gPlaying = true;
-	gActivePiece = gPieces[randomInt(gPieces.length)];
-	gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
-	gY = 0 - gActivePiece.minY;
 	clearBoard();
-	
-	// update the screen
+	gStartNewPiece = true;
+	gNextPiece = gPieces[randomInt(gPieces.length)];
 	gBoardContext.clearRect(0, 0, gBoardCanvas.width, gBoardCanvas.height); // might also need to temporarily set the width to 1 and back again
-	plotActivePiece();
 	
 	// grab keyboard focus
 	
 	// start the play loop
-	gTimer = setTimeout("gameLoop()", kLoopTime);
+	gameLoop();
 	
 	return false;
 }
@@ -150,15 +148,38 @@ function gameLoop()
 	
 	var loopStart = new Date();
 	
-	// move the piece down
-	var moveSuccess = moveActivePiece(0, 1, false);
-
-	// handle the case when we cannot move the piece down
-	if (moveSuccess == false)
+	if (gStartNewPiece)
 	{
-		alert("Game Over! (" + gLoopCount + " loops, " + (gTotalLoopTimeouts / gLoopCount).toFixed(1) + " ms per loop)");
-		gPlaying = false;
-		return;
+		gActivePiece = gNextPiece;
+		gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
+		gY = 0 - gActivePiece.minY;
+		gNextPiece = gPieces[randomInt(gPieces.length)];
+		
+		if (canPlacePiece(gActivePiece, gX, gY))
+		{
+			plotActivePiece();
+			
+			gStartNewPiece = false;
+		}
+		else
+		{
+			alert("Game Over! (" + gLoopCount + " loops, " + (gTotalLoopTimeouts / gLoopCount).toFixed(1) + " ms per loop)");
+			gPlaying = false;
+			return;
+		}
+	}
+	else
+	{
+		// move the piece down
+		var moveSuccess = moveActivePiece(0, 1, false);
+
+		// handle the case when we cannot move the piece down
+		if (moveSuccess == false)
+		{
+			gluePiece(gActivePiece, gX, gY, 1);
+			
+			gStartNewPiece = true;
+		}
 	}
 	
 	// prepare for another loop
