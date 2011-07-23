@@ -91,6 +91,7 @@ var gActivePiece = null;
 var gNextPiece = null;
 var gBoard = new Array();  // kBoardWidth * kBoardHeight
 var gStartNewPiece = false;
+var gDropping = false;
 
 function initAll()
 {
@@ -125,6 +126,7 @@ function startGame()
 	gLoopCount = 1;
 	gTotalLoopTimeouts = kLoopTime;
 	gPlaying = true;
+	gDropping = false;
 	clearBoard();
 	gStartNewPiece = true;
 	gNextPiece = gPieces[randomInt(gPieces.length)];
@@ -154,6 +156,7 @@ function gameLoop()
 		gX = (kBoardWidth / 2) >> 0;  // also ~~(x/y) or Math.floor(x/y) for integer division
 		gY = 0 - gActivePiece.minY;
 		gNextPiece = gPieces[randomInt(gPieces.length)];
+		gDropping = false;
 		
 		if (canPlacePiece(gActivePiece, gX, gY))
 		{
@@ -188,7 +191,8 @@ function gameLoop()
 	
 	if (elapsed < kLoopTime)
 	{
-		var timeout = kLoopTime - elapsed;
+		var loopTime = gDropping ? (kLoopTime / 3) : kLoopTime;
+		var timeout = loopTime - elapsed;
 		gTotalLoopTimeouts += timeout;
 		gLoopCount += 1;
 		gTimer = setTimeout("gameLoop()", timeout);
@@ -231,6 +235,8 @@ function moveLeft()
 	if (gPlaying)
 	{
 		moveActivePiece(-1, 0, false);
+		
+		gDropping = false;
 	}
 	
 	return false;
@@ -241,6 +247,8 @@ function moveRight()
 	if (gPlaying)
 	{
 		moveActivePiece(1, 0, false);
+		
+		gDropping = false;
 	}
 	
 	return false;
@@ -251,6 +259,8 @@ function rotate()
 	if (gPlaying)
 	{
 		moveActivePiece(0, 0, true);
+		
+		gDropping = false;
 	}
 	
 	return false;
@@ -258,6 +268,8 @@ function rotate()
 
 function drop()
 {
+	gDropping = true;
+	
 	return false;
 }
 
