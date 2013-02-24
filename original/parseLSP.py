@@ -83,14 +83,12 @@ def printstr(s):
     sys.stdout.write(s)
 
 
-def processFile(infile, outfile):
-    x = 0
+def processFile(infile):
     while True:
         b = infile.read(1)
         if b == '':
             break
         b = ord(b)
-        x += 1
         #print 'read', hex(b)
         if b == TOKEN_UNIT:
             skip(infile, 5)
@@ -190,7 +188,6 @@ def processFile(infile, outfile):
         else:
             #printstr('{ unknown byte %02X }' % b)
             pass
-    print '{ read', x, 'bytes }'
 
 
 if len(sys.argv) != 2:
@@ -201,7 +198,6 @@ infilename = sys.argv[1]
 outfilename = infilename + '.p'
 
 with open(infilename, 'rb') as infile:
-    with open(outfilename + '.p', 'w') as outfile:
-        print '{ Parsing', infilename, 'into', outfilename, '}'
-        processFile(infile, outfile)
+    print '{ Pascal source code from', infilename, '}'
+    processFile(infile)
 
