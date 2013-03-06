@@ -6,6 +6,32 @@ import sys
 
 # byte codes
 #TOKEN_COMMENT    = 0x00
+TOKEN_SPACE      = 0x08
+TOKEN_GETS       = 0x0A
+TOKEN_LPAREN2    = 0x10
+TOKEN_COMMA2     = 0x12
+TOKEN_RPAREN2    = 0x16
+TOKEN_LBRACKET   = 0x18
+TOKEN_RBRACKET   = 0x1C
+TOKEN_AT         = 0x26
+TOKEN_RANGE      = 0x2C
+TOKEN_TIMES      = 0x30
+TOKEN_AND        = 0x38
+TOKEN_PLUS       = 0x3C
+TOKEN_MINUS      = 0x3E
+TOKEN_OR         = 0x40
+TOKEN_EQUALS     = 0x44
+TOKEN_NOT_EQUALS = 0x46
+TOKEN_LESS_THAN  = 0x48
+TOKEN_GREATER_THAN = 0x4A
+#>= 4c
+TOKEN_LESSEQUAL  = 0x4E
+TOKEN_IN         = 0x50
+TOKEN_DOT        = 0x52
+TOKEN_NULL       = 0x58
+TOKEN_INTEGER    = 0x5A
+TOKEN_HYPHEN     = 0x5E
+TOKEN_IDENTIFIER2 = 0x5C
 TOKEN_PACKED_A   = 0x60
 TOKEN_OF         = 0x64
 TOKEN_PACKED_R   = 0x68
@@ -13,13 +39,22 @@ TOKEN_POINTER    = 0x6A
 TOKEN_RECORD     = 0x6C
 TOKEN_STRING     = 0x70
 TOKEN_ARRAY      = 0x74
-TOKEN_EQUALS     = 0x7A
+TOKEN_WHILE      = 0x76
+TOKEN_STATEMENT  = 0x78
+TOKEN_IS         = 0x7A
 TOKEN_COMMA      = 0x7C
 TOKEN_IDENTIFIER = 0x7E
+TOKEN_BEGIN      = 0x80
+TOKEN_IF         = 0x86
+TOKEN_CASE       = 0x88
+TOKEN_DO         = 0x8C
+TOKEN_WITH       = 0x90
 TOKEN_COMMENT    = 0x92
 TOKEN_NEWLINE    = 0x94
+TOKEN_ELSE       = 0x96
 TOKEN_SEMICOLON  = 0x98
 TOKEN_END        = 0x9A
+TOKEN_DEFAULT    = 0x9C
 TOKEN_USES       = 0x9E
 TOKEN_TYPE       = 0xA4
 TOKEN_CONST      = 0xA2
@@ -89,7 +124,7 @@ def processFile(infile):
         if b == '':
             break
         b = ord(b)
-        #print 'read', hex(b)
+        #printstr('{read %02X}' % b)
         if b == TOKEN_UNIT:
             skip(infile, 5)
             name = readString(infile)
@@ -117,36 +152,44 @@ def processFile(infile):
             skip(infile, 1)
             name = readString(infile)
             printstr(name)
+        elif b == TOKEN_IDENTIFIER2:
+            name = readString(infile)
+            printstr(name)
         elif b == TOKEN_COMMA:
             n = ord(infile.read(1))
             printstr(', ' * n)
         elif b == TOKEN_CONST:
             skip(infile, 1)
-            printstr('const')
+            printstr('const\n')
         elif b == TOKEN_COMMENT:
             skip(infile, 3)
             comment = readString(infile)
-            printstr(comment)
+            printstr('%s\n' % comment)
         elif b == TOKEN_CONST_DEF:
             skip(infile, 1)
             name = readString(infile)
-            printstr(name)
-        elif b == 0x78:
-            skip(infile, 11)
-        elif b == TOKEN_EQUALS:
-            skip(infile, 1)
-            x = readInt(infile)
-            printstr(' = %d' % x)
+            printstr('%s =' % name)
+        elif b == TOKEN_IS:
+            type_code = ord(infile.read(1))
+            if type_code == 3:
+                x = readInt(infile)
+                printstr(' %d' % x)
+            elif type_code == 5:
+                skip(infile, 4)
+                value = readString(infile)
+                printstr(value)
+            else:
+                printstr('{ unknown type code %02X }' % type_code)
         elif b == TOKEN_POINTER:
             skip(infile, 1)
             value = readString(infile)
-            printstr(' = ^%s' % value)
+            printstr(' ^%s' % value)
         elif b == TOKEN_PACKED_A or b == TOKEN_PACKED_R:
             skip(infile, 1)
-            printstr(' = packed ')
+            printstr(' packed ')
         elif b == TOKEN_RECORD:
             skip(infile, 1)
-            printstr(' = record\n')
+            printstr(' record\n')
         elif b == TOKEN_TYPE:
             skip(infile, 1)
             printstr('type')
@@ -167,7 +210,7 @@ def processFile(infile):
         elif b == TOKEN_STRING:
             skip(infile, 1)
             n = readInt(infile)
-            printstr(': String[%d]' % n);
+            printstr('String[%d]' % n);
         elif b == TOKEN_VAR:
             skip(infile, 1)
             printstr('var\n')
@@ -185,8 +228,95 @@ def processFile(infile):
             skip(infile, 5)
             name = readString(infile)
             printstr('procedure %s' % name)
+        elif b == TOKEN_BEGIN:
+            skip(infile, 9)
+            printstr('\nbegin\n')
+        elif b == TOKEN_WITH:
+            skip(infile, 1)
+            printstr('with ')
+        elif b == TOKEN_IF:
+            skip(infile, 1)
+            printstr('\nif ')
+        elif b == TOKEN_STATEMENT:
+            skip(infile, 1)
+            printstr('\n')
+        elif b == TOKEN_ELSE:
+            skip(infile, 1)
+            printstr('\nelse\n')
+        elif b == TOKEN_OR:
+            printstr(' or ')
+        elif b == TOKEN_EQUALS:
+            printstr(' = ')
+        elif b == TOKEN_NOT_EQUALS:
+            printstr(' <> ')
+        elif b == TOKEN_GETS:
+            printstr(' := ')
+        elif b == TOKEN_LPAREN2:
+            printstr('(')
+        elif b == TOKEN_RPAREN2:
+            printstr(')')
+        elif b == TOKEN_COMMA2:
+            printstr(', ')
+        elif b == TOKEN_INTEGER:
+            type_code = ord(infile.read(1))
+            if type_code == 0x03:
+                x = ord(infile.read(1)) * 256
+                x += ord(infile.read(1))
+                printstr('%d' % x)
+            elif type_code == 0x02:
+                s = readString(infile)
+                printstr('\'%s\'' % s)
+            elif type_code == 0x05:
+                s = readString(infile)
+                printstr('"%s"' % s)
+            else:
+                printstr('unknown number code %02X' % type_code)
+        elif b == TOKEN_TIMES:
+            printstr(' * ')
+        elif b == TOKEN_SPACE:
+            printstr(' ')
+        elif b == TOKEN_LESSEQUAL:
+            printstr(' <= ')
+        elif b == TOKEN_LBRACKET:
+            printstr('[')
+        elif b == TOKEN_RBRACKET:
+            printstr(']')
+        elif b == TOKEN_IN:
+            printstr(' in ')
+        elif b == TOKEN_RANGE:
+            printstr('..')
+        elif b == TOKEN_PLUS:
+            printstr(' + ')
+        elif b == TOKEN_MINUS:
+            printstr(' - ')
+        elif b == TOKEN_NULL:
+            printstr('null')
+        elif b == TOKEN_HYPHEN:
+            printstr('-')
+        elif b == TOKEN_CASE:
+            skip(infile, 1)
+            printstr('case ')
+        elif b == TOKEN_DO:
+            skip(infile, 1)
+            printstr('do\n')
+        elif b == TOKEN_AT:
+            printstr('@')
+        elif b == TOKEN_WHILE:
+            skip(infile, 1)
+            printstr('\nwhile ')
+        elif b == TOKEN_DEFAULT:
+            skip(infile, 1)
+            printstr('default')
+        elif b == TOKEN_AND:
+            printstr(' and ')
+        elif b == TOKEN_LESS_THAN:
+            printstr(' < ')
+        elif b == TOKEN_GREATER_THAN:
+            printstr(' > ')
+        elif b == TOKEN_DOT:
+            printstr('.')
         else:
-            #printstr('{ unknown byte %02X }' % b)
+            printstr('{ unknown byte %02X }' % b)
             pass
 
 
