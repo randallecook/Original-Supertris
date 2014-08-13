@@ -28,6 +28,7 @@ TOKEN_GREATER_THAN = 0x4A
 TOKEN_LESSEQUAL  = 0x4E
 TOKEN_IN         = 0x50
 TOKEN_DOT        = 0x52
+TOKEN_DEREFERENCE = 0x54
 TOKEN_NULL       = 0x58
 TOKEN_INTEGER    = 0x5A
 TOKEN_HYPHEN     = 0x5E
@@ -65,6 +66,7 @@ TOKEN_PROGRAM    = 0xAE
 TOKEN_PROCEDURE  = 0xB0
 TOKEN_FUNCTION   = 0xB2
 TOKEN_VAR        = 0xBA
+TOKEN_COND_COMP  = 0xC4
 TOKEN_UNIT       = 0xC6
 TOKEN_INTERFACE  = 0xC8
 TOKEN_IMPLEMENTATION = 0xCA
@@ -139,6 +141,10 @@ def processFile(infile):
         elif b == TOKEN_IMPLEMENTATION:
             skip(infile, 5)
             printstr('implementation')
+        elif b == TOKEN_COND_COMP:
+            skip(infile, 3)
+            s = readString(infile)
+            printstr('{CONDITIONAL:} %s\n' % s)
         elif b == TOKEN_SEMICOLON:
             n = ord(infile.read(1))
             printstr(';\n' * n)
@@ -269,6 +275,10 @@ def processFile(infile):
             elif type_code == 0x05:
                 s = readString(infile)
                 printstr('"%s"' % s)
+            elif type_code == 0x0A:
+                skip(infile, 2)
+                s = readString(infile)
+                printstr(s)
             else:
                 printstr('unknown number code %02X' % type_code)
         elif b == TOKEN_TIMES:
@@ -315,6 +325,8 @@ def processFile(infile):
             printstr(' > ')
         elif b == TOKEN_DOT:
             printstr('.')
+        elif b == TOKEN_DEREFERENCE:
+            printstr('^')
         else:
             printstr('{ unknown byte %02X }' % b)
             pass
