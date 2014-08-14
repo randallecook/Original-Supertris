@@ -7,15 +7,21 @@ import sys
 # byte codes
 #TOKEN_COMMENT    = 0x00
 TOKEN_SPACE      = 0x08
+TOKEN_TO         = 0x0C
+TOKEN_DOWN_TO    = 0x0E
 TOKEN_GETS       = 0x0A
 TOKEN_LPAREN2    = 0x10
 TOKEN_COMMA2     = 0x12
 TOKEN_RPAREN2    = 0x16
 TOKEN_LBRACKET   = 0x18
 TOKEN_RBRACKET   = 0x1C
+TOKEN_NOT        = 0x24
 TOKEN_AT         = 0x26
 TOKEN_RANGE      = 0x2C
 TOKEN_TIMES      = 0x30
+TOKEN_SLASH      = 0x32
+TOKEN_DIV        = 0x34
+TOKEN_MOD        = 0x36
 TOKEN_AND        = 0x38
 TOKEN_PLUS       = 0x3C
 TOKEN_MINUS      = 0x3E
@@ -24,15 +30,15 @@ TOKEN_EQUALS     = 0x44
 TOKEN_NOT_EQUALS = 0x46
 TOKEN_LESS_THAN  = 0x48
 TOKEN_GREATER_THAN = 0x4A
-#>= 4c
-TOKEN_LESSEQUAL  = 0x4E
+TOKEN_GR_EQUAL   = 0x4C
+TOKEN_LESS_EQUAL = 0x4E
 TOKEN_IN         = 0x50
 TOKEN_DOT        = 0x52
 TOKEN_DEREFERENCE = 0x54
 TOKEN_NULL       = 0x58
 TOKEN_INTEGER    = 0x5A
-TOKEN_HYPHEN     = 0x5E
 TOKEN_IDENTIFIER2 = 0x5C
+TOKEN_HYPHEN     = 0x5E
 TOKEN_PACKED_A   = 0x60
 TOKEN_OF         = 0x64
 TOKEN_PACKED_R   = 0x68
@@ -49,6 +55,7 @@ TOKEN_BEGIN      = 0x80
 TOKEN_IF         = 0x86
 TOKEN_CASE       = 0x88
 TOKEN_DO         = 0x8C
+TOKEN_FOR        = 0x8E
 TOKEN_WITH       = 0x90
 TOKEN_COMMENT    = 0x92
 TOKEN_NEWLINE    = 0x94
@@ -283,10 +290,18 @@ def processFile(infile):
                 printstr('unknown number code %02X' % type_code)
         elif b == TOKEN_TIMES:
             printstr(' * ')
+        elif b == TOKEN_MOD:
+            printstr(' mod ')
+        elif b == TOKEN_SLASH:
+            printstr(' / ')
+        elif b == TOKEN_DIV:
+            printstr(' div ')
         elif b == TOKEN_SPACE:
             printstr(' ')
-        elif b == TOKEN_LESSEQUAL:
+        elif b == TOKEN_LESS_EQUAL:
             printstr(' <= ')
+        elif b == TOKEN_GR_EQUAL:
+            printstr(' >= ')
         elif b == TOKEN_LBRACKET:
             printstr('[')
         elif b == TOKEN_RBRACKET:
@@ -309,6 +324,10 @@ def processFile(infile):
         elif b == TOKEN_DO:
             skip(infile, 1)
             printstr('do\n')
+        elif b == TOKEN_FOR:
+            skip(infile, 1)
+            s = readString(infile)
+            printstr('for %s := ' % s)
         elif b == TOKEN_AT:
             printstr('@')
         elif b == TOKEN_WHILE:
@@ -317,6 +336,8 @@ def processFile(infile):
         elif b == TOKEN_DEFAULT:
             skip(infile, 1)
             printstr('default')
+        elif b == TOKEN_NOT:
+            printstr(' not ')
         elif b == TOKEN_AND:
             printstr(' and ')
         elif b == TOKEN_LESS_THAN:
@@ -327,6 +348,10 @@ def processFile(infile):
             printstr('.')
         elif b == TOKEN_DEREFERENCE:
             printstr('^')
+        elif b == TOKEN_TO:
+            printstr(' to ')
+        elif b == TOKEN_DOWN_TO:
+            printstr(' down to ')
         else:
             printstr('{ unknown byte %02X }' % b)
             pass
