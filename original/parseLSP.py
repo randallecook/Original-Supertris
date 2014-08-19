@@ -6,12 +6,14 @@ import sys
 
 # byte codes
 #TOKEN_COMMENT    = 0x00
+TOKEN_PERIOD     = 0x00
 TOKEN_SPACE      = 0x08
 TOKEN_TO         = 0x0C
 TOKEN_DOWN_TO    = 0x0E
 TOKEN_GETS       = 0x0A
 TOKEN_LPAREN2    = 0x10
 TOKEN_COMMA2     = 0x12
+TOKEN_COMMA3     = 0x14
 TOKEN_RPAREN2    = 0x16
 TOKEN_LBRACKET   = 0x18
 TOKEN_RBRACKET   = 0x1C
@@ -54,6 +56,7 @@ TOKEN_IDENTIFIER = 0x7E
 TOKEN_BEGIN      = 0x80
 TOKEN_IF         = 0x86
 TOKEN_CASE       = 0x88
+TOKEN_WHILE2     = 0x8A
 TOKEN_DO         = 0x8C
 TOKEN_FOR        = 0x8E
 TOKEN_WITH       = 0x90
@@ -268,11 +271,17 @@ def processFile(infile):
             printstr('(')
         elif b == TOKEN_RPAREN2:
             printstr(')')
-        elif b == TOKEN_COMMA2:
+        elif b == TOKEN_COMMA2 or b == TOKEN_COMMA3:
             printstr(', ')
         elif b == TOKEN_INTEGER:
             type_code = ord(infile.read(1))
-            if type_code == 0x03:
+            if type_code == 0x04:
+                x = ord(infile.read(1)) * 256 * 256 * 256
+                x += ord(infile.read(1)) * 256 * 256
+                x += ord(infile.read(1)) * 256
+                x += ord(infile.read(1))
+                printstr('%d' % x)
+            elif type_code == 0x03:
                 x = ord(infile.read(1)) * 256
                 x += ord(infile.read(1))
                 printstr('%d' % x)
@@ -330,7 +339,7 @@ def processFile(infile):
             printstr('for %s := ' % s)
         elif b == TOKEN_AT:
             printstr('@')
-        elif b == TOKEN_WHILE:
+        elif b == TOKEN_WHILE or b == TOKEN_WHILE2:
             skip(infile, 1)
             printstr('\nwhile ')
         elif b == TOKEN_DEFAULT:
@@ -352,6 +361,9 @@ def processFile(infile):
             printstr(' to ')
         elif b == TOKEN_DOWN_TO:
             printstr(' down to ')
+        elif b == TOKEN_PERIOD:
+            skip(infile, 3)
+            printstr('.\n')
         else:
             printstr('{ unknown byte %02X }' % b)
             pass
