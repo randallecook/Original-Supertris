@@ -242,7 +242,7 @@ def processFile(infile):
         elif b == TOKEN_DIV:
             emit(b, 'div', None)
         elif b == TOKEN_SPACE:
-            emit(b, ' ', None)
+            emit(b, 'SPACE', None)
         elif b == TOKEN_LESS_EQUAL:
             emit(b, '<=', None)
         elif b == TOKEN_GR_EQUAL:
