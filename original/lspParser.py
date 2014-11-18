@@ -63,11 +63,27 @@ def parseUses():
             raise LSPSyntaxError('uses list element', token)
 
 
+def parseConst():
+    constants = []
+    while True:
+        name = skipSpace()
+        if name['id'] != TOKEN_CONST_DEF:
+            return { 'const': constants }
+        value = skipSpace()
+        require(value, TOKEN_IS, '=')
+        semi = skipSpace()
+        require(semi, TOKEN_SEMICOLON, ';')
+        constants.append({ name['data']: value['data'] })
+
+
 def parseInterface():
     interface = []
     token = skipSpace()
     if token['id'] == TOKEN_USES:
         interface.append(parseUses())
+    token = skipSpace()
+    if token['id'] == TOKEN_CONST:
+        interface.append(parseConst())
     return { 'interface': interface }
 
 
