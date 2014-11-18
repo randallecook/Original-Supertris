@@ -39,23 +39,53 @@ def getToken():
 def skipSpace():
     while True:
         token = getToken()
-        if token['id'] != TOKEN_SPACE:
+        code = token['id']
+        if code != TOKEN_SPACE and code != TOKEN_NEWLINE:
             return token
+
+
+def require(token, code, name):
+    if token['id'] != code:
+        raise LSPSyntaxError(name, token);
+
+
+def parseUses():
+    units = []
+    while True:
+        token = skipSpace()
+        if token['id'] == TOKEN_IDENTIFIER:
+            units.append(token['data'])
+            token = skipSpace()
+            if token['id'] == TOKEN_SEMICOLON:
+                return { 'uses': units }
+            require(token, TOKEN_COMMA, ',')
+        else:
+            raise LSPSyntaxError('uses list element', token)
+
+
+def parseInterface():
+    interface = []
+    token = skipSpace()
+    if token['id'] == TOKEN_USES:
+        interface.append(parseUses())
+    return { 'interface': interface }
 
 
 def parseUnit(token):
     print 'parsing unit'
     unit_name = token['data']
     token = skipSpace()
-    if (token['id'] != TOKEN_SEMICOLON):
-        raise LSPSyntaxError(';', token);
-    return { 'unit': unit_name }
+    require(token, TOKEN_SEMICOLON, ';')
+    token = skipSpace()
+    require(token, TOKEN_INTERFACE, 'interface')
+    interface = parseInterface()
+    return { 'unit': { 'name': unit_name, 'body': [ interface ] } }
 
 
 def parseFile():
     print 'parsing file'
     token = getToken()
-    if (token['id'] == TOKEN_UNIT):
+    if token['id'] == TOKEN_UNIT:
         return parseUnit(token)
     else:
         raise LSPSyntaxError('unit', token)
@@ -65,5 +95,5 @@ def parseFile():
 gTokens = tokenGenerator()
 tree = parseFile()
 print '---', 'Parse Tree', '---'
-print json.dumps(tree)
+print json.dumps(tree, indent=2, separators=(',', ': '))
 
